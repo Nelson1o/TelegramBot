@@ -2,54 +2,73 @@ require('dotenv').config()
 const axios = require('axios');
 const express = require('express')
 
-const TELEGRAM_URL = `http://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/getUpdates`;
-const TELEGRAM_URL_SEND = `http://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`;
+class TelegramBot{
+    app = express();
+    localId = 0;
 
-const app = express();
-app.use(express.json());
-app.use(
-    express.urlencoded({
-        extended: true
-    })
-)
-
-const sendMessage = async (id) => {
-    await axios.post(TELEGRAM_URL_SEND + `?chat_id=${id}&text=Бот запущен и готов к работе!`)
-}
-
-let localId = 0;
-
-const condition = (id) => {
-    if(localId !== id){
-        localId = id;
-        return true
+    constructor(token, port){
+        this.token = token;
+        this.port = port || 3000;
     }
-    return false
-}
 
-const start = async () => {
-    setInterval(() => {
-        axios.get(TELEGRAM_URL)
-            .then(response => {
-                let mas = response.data.result;
-                let messageText = mas[mas.length - 1].message.text
-                let id = mas[mas.length - 1].message.message_id
-                if(condition(id)){
-                    console.log(messageText);
-                }
-                else{
-                    return
-                }                
-                if (messageText === "/start") {
-                    let chatId = mas[mas.length - 1].message.chat.id
-                    sendMessage(chatId);
-                }
+    getURL(type){
+        switch (type) {
+            case 1:
+                return `http://api.telegram.org/bot${this.token}/getUpdates`
+            case 2:
+                return `http://api.telegram.org/bot${this.token}/sendMessage`
+            default:
+                break;
+        }
+    }
+
+    listen(){
+        this.app.use(express.json());
+        this.app.use(
+            express.urlencoded({
+                extended: true
             })
-    }, 1000)
+        )
+
+        this.app.listen(this.port, async () => {
+            console.log(`Server running on port ${this.port}`);
+            await this.start();
+        })
+    }
+
+    start = async () => {
+        setInterval(() => {
+            axios.get(this.getURL(1))
+                .then(response => {
+                    let mas = response.data.result;
+                    let messageText = mas[mas.length - 1].message.text
+                    let id = mas[mas.length - 1].message.message_id
+                    if(this.condition(id)){
+                        console.log(messageText);
+                    }
+                    else{
+                        return
+                    }                
+                    if (messageText === "/start") {
+                        let chatId = mas[mas.length - 1].message.chat.id
+                        this.sendMessage(chatId);
+                    }
+                })
+        }, 1000)
+    }
+
+    sendMessage = async (id) => {
+        await axios.post(this.getURL(2) + `?chat_id=${id}&text=Бот запущен и готов к работе!`)
+    }
+
+    condition = (id) => {
+        if(this.localId !== id){
+            this.localId = id;
+            return true
+        }
+        return false
+    }
 }
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-    console.log(`Server running on port ${PORT}`);
-    await start();
-})
+const Bot = new TelegramBot(process.env.TELEGRAM_TOKEN, process.env.PORT);
+Bot.listen();
