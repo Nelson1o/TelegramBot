@@ -1,0 +1,33 @@
+* {
+    box-sizing: border-box;
+}
+
+.bot_title {
+    text-align: center;
+    margin-top: 100px;
+}
+
+.message_container {
+    width: 850px;
+    height: 450px;
+    border-radius: 5px;
+    border: 1px solid black;
+    margin: 0 auto;
+    margin-top: 10px;
+    padding: 5px;
+    overflow: auto;
+}
+
+.message_card {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    width: 785px;
+    height: 50px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 0 auto;
+    padding: 5px;
+    margin-bottom: 5px;
+}
