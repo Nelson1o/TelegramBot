@@ -1,5 +1,6 @@
 let timerId;
-let localObj;
+let flag = false;
+let localId = 0;
 let messageContainer = document.querySelector(".message_container")
 
 function CreateCard(obj) {
@@ -16,9 +17,9 @@ function CreateCard(obj) {
     messageContainer.append(card)
 }
 
-const Condition = (obj) => {
-    if (JSON.stringify(localObj) !== JSON.stringify(obj)) {
-        localObj = Object.assign({}, obj)
+const Condition = (id) => {
+    if (localId !== id) {
+        localId = id;
         return true
     }
     return false
@@ -31,8 +32,7 @@ async function GetMessage() {
     });
     if (response.ok === true) {
         let obj = await response.json();
-        console.log(obj);
-        if (Condition(obj)) {
+        if (Condition(obj.id)) {
             CreateCard(obj);
         }
         else {
@@ -40,10 +40,17 @@ async function GetMessage() {
         }   
     }
     else {
-        clearInterval(timerId)
+        flag = true;
     }
 }
 
 timerId = setInterval(() => {
+    if(flag){
+        clearTimer();
+    }
     GetMessage();
-}, 5000)
+}, 1000)
+
+const clearTimer = () => {
+    clearInterval(timerId);
+}

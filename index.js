@@ -8,6 +8,8 @@ const GET_UPDATES = 'GET_UPDATES';
 const SEND_MESSAGE = 'SEND_MESSAGE';
 
 class TelegramBot {
+    localObj;
+
     constructor(token) {
         this.token = token;
     }
@@ -15,25 +17,31 @@ class TelegramBot {
     getURL = (type) => {
         switch (type) {
             case GET_UPDATES:
-                return `http://api.telegram.org/bot${this.token}/getUpdates`
+                return `http://api.telegram.org/bot${this.token}/getUpdates`;
             case SEND_MESSAGE:
-                return `http://api.telegram.org/bot${this.token}/sendMessage`
+                return `http://api.telegram.org/bot${this.token}/sendMessage`;
             default:
                 break;
         }
     }
 
-    postMessage(obj) {
-        console.log(obj);
-        let data = obj;
+    postMessage() {
         app.get("/api/getMessage", (req, res) => {
+            let data = this.getObj();
             res.send(data);
-            console.log(data);
         })
     }
 
     sendMessage = async (id) => {
-        await axios.post(this.getURL('SEND_MESSAGE') + `?chat_id=${id}&text=Бот запущен и готов к работе!`)
+        await axios.post(this.getURL('SEND_MESSAGE') + `?chat_id=${id}&text=Бот запущен и готов к работе!`);
+    }
+
+    getObj() {
+        return this.localObj;
+    }
+
+    setObj(obj) {
+        this.localObj = Object.assign({}, obj);
     }
 }
 
@@ -50,12 +58,12 @@ app.use(express.static(path.resolve(__dirname, 'public')));
 
 let localId = 0;
 
-condition = (id) => {
+const condition = (id) => {
     if (localId !== id) {
         localId = id;
-        return true
+        return true;
     }
-    return false
+    return false;
 }
 
 const start = async () => {
@@ -65,19 +73,21 @@ const start = async () => {
                 let mas = response.data.result;
                 let messageText = mas[mas.length - 1].message.text;
                 let messageStruct = {
+                    id: mas[mas.length - 1].update_id,
                     name: mas[mas.length - 1].message.from.first_name,
                     text: mas[mas.length - 1].message.text,
                     time: mas[mas.length - 1].message.date
                 }
                 let id = mas[mas.length - 1].message.message_id;
                 if (condition(id)) {
-                    Bot.postMessage(messageStruct)
+                    Bot.setObj(messageStruct);
+                    Bot.postMessage();
                 }
                 else {
-                    return
+                    return;
                 }
                 if (messageText === "/start") {
-                    let chatId = mas[mas.length - 1].message.chat.id
+                    let chatId = mas[mas.length - 1].message.chat.id;
                     Bot.sendMessage(chatId);
                 }
             })
