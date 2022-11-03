@@ -1,0 +1,16 @@
+{
+    "extends": "airbnb",
+    "env": {
+        "es6": true,
+        "browser": true,
+        "node": true
+    },
+    "rules":{
+        "linebreak-style": 0,
+        "global-require": 0,
+        "eslint linebreak-style": [0, "error", "windows"],
+        "indent": "off",
+        "brace-style": "off"
+    },
+    "parser": "babel-eslint"
+}
