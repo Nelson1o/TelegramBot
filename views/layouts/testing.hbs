@@ -1,0 +1,20 @@
+<div class="wrapper">
+    <div><i id="serverLogs">Server 123</i></div>
+    <h1 class="bot_title">Telegram Message</h1>
+    <div class="message_container">
+        <div class="message_card">
+            <div class="user_name">Anton</div>
+            <div class="message_text">Hello World!</div>
+            <div class="message_date">24.10.2022</div>
+        </div>
+        {{#if listExists}}
+        {{#each fakeObj}}
+        <div class="message_card">
+            <div class="user_name">{{this.name}}</div>
+            <div class="message_text">{{this.text}}</div>
+            <div class="message_date">{{this.time}}</div>
+        </div>
+        {{/each}}
+        {{/if}}
+    </div>
+</div>

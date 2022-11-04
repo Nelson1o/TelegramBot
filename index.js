@@ -4,6 +4,8 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
+const handlebars = require('express-handlebars');
+
 const GET_UPDATES = 'GET_UPDATES';
 const SEND_MESSAGE = 'SEND_MESSAGE';
 
@@ -28,7 +30,7 @@ class TelegramBot {
     postMessage() {
         app.get("/api/getMessage", (req, res) => {
             let data = this.getObj();
-            res.send(data);
+            // res.send(data);
         })
     }
 
@@ -37,6 +39,7 @@ class TelegramBot {
     }
 
     getObj() {
+        console.log(this.localObj + ':__:');
         return this.localObj;
     }
 
@@ -54,7 +57,7 @@ app.use(
         extended: true
     })
 )
-app.use(express.static(path.resolve(__dirname, 'public')));
+// app.use(express.static(path.resolve(__dirname, 'public')));
 
 let localId = 0;
 
@@ -81,15 +84,15 @@ const start = async () => {
                 let id = mas[mas.length - 1].message.message_id;
                 if (condition(id)) {
                     Bot.setObj(messageStruct);
-                    Bot.postMessage();
+                    // Bot.postMessage();
                 }
-                else {
-                    return;
-                }
-                if (messageText === "/start") {
-                    let chatId = mas[mas.length - 1].message.chat.id;
-                    Bot.sendMessage(chatId);
-                }
+                // else {
+                //     return;
+                // }
+                // if (messageText === "/start") {
+                //     let chatId = mas[mas.length - 1].message.chat.id;
+                //     Bot.sendMessage(chatId);
+                // }
             })
     }, 1000)
 }
@@ -97,5 +100,43 @@ const start = async () => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);
+    // await start();
+})
+
+app.set('view engine', 'hbs');
+app.engine('hbs', handlebars.engine({
+    layoutsDir: __dirname + '/views/layouts',
+    extname: 'hbs'
+}));
+
+app.use(express.static(path.resolve(__dirname, 'public')));
+
+const fakeFunc = async () => {
     await start();
+    const fakeFake = Bot.getObj();
+    return fakeFake;
+    // return [
+    //     {
+    //         name: 'Anton',
+    //         id: 123,
+    //         text: 'Kyky',
+    //         date: '123123'
+    //     },
+    //     {
+    //         name: 'Pardon',
+    //         id: 123,
+    //         text: 'kmvkvml',
+    //         date: '64532132'
+    //     },
+    //     {
+    //         name: 'Gnadon',
+    //         id: 123,
+    //         text: 'ad,sld,;d',
+    //         date: 'qwerty123456'
+    //     }
+    // ]
+}
+
+app.get('/', (req, res) => {
+    res.render('index', { layout: 'testing', fakeObj: fakeFunc(), listExists: true });
 })
