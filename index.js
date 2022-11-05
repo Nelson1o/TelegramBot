@@ -30,7 +30,7 @@ class TelegramBot {
     postMessage() {
         app.get("/api/getMessage", (req, res) => {
             let data = this.getObj();
-            // res.send(data);
+            res.send(data);
         })
     }
 
@@ -39,7 +39,6 @@ class TelegramBot {
     }
 
     getObj() {
-        console.log(this.localObj + ':__:');
         return this.localObj;
     }
 
@@ -49,15 +48,6 @@ class TelegramBot {
 }
 
 const Bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
-
-app = express();
-app.use(express.json());
-app.use(
-    express.urlencoded({
-        extended: true
-    })
-)
-// app.use(express.static(path.resolve(__dirname, 'public')));
 
 let localId = 0;
 
@@ -82,61 +72,46 @@ const start = async () => {
                     time: mas[mas.length - 1].message.date
                 }
                 let id = mas[mas.length - 1].message.message_id;
+
                 if (condition(id)) {
                     Bot.setObj(messageStruct);
-                    // Bot.postMessage();
+                    Bot.postMessage();
                 }
-                // else {
-                //     return;
-                // }
-                // if (messageText === "/start") {
-                //     let chatId = mas[mas.length - 1].message.chat.id;
-                //     Bot.sendMessage(chatId);
-                // }
+                else {
+                    return;
+                }
+                if (messageText === "/start") {
+                    let chatId = mas[mas.length - 1].message.chat.id;
+                    Bot.sendMessage(chatId);
+                }
             })
     }, 1000)
 }
 
+app = express();
+app.use(express.json());
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+)
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);
-    // await start();
+    await start();
 })
 
-app.set('view engine', 'hbs');
-app.engine('hbs', handlebars.engine({
-    layoutsDir: __dirname + '/views/layouts',
-    extname: 'hbs'
-}));
+const hbs = handlebars.create({
+    defaultLayout: 'main',
+    layoutsDir: path.join(__dirname, 'views/layouts')
+})
 
-app.use(express.static(path.resolve(__dirname, 'public')));
+app.set('view engine', 'handlebars');
+app.engine('handlebars', hbs.engine);
 
-const fakeFunc = async () => {
-    await start();
-    const fakeFake = Bot.getObj();
-    return fakeFake;
-    // return [
-    //     {
-    //         name: 'Anton',
-    //         id: 123,
-    //         text: 'Kyky',
-    //         date: '123123'
-    //     },
-    //     {
-    //         name: 'Pardon',
-    //         id: 123,
-    //         text: 'kmvkvml',
-    //         date: '64532132'
-    //     },
-    //     {
-    //         name: 'Gnadon',
-    //         id: 123,
-    //         text: 'ad,sld,;d',
-    //         date: 'qwerty123456'
-    //     }
-    // ]
-}
+app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.render('index', { layout: 'testing', fakeObj: fakeFunc(), listExists: true });
+    res.render('index', { title: 'Telegram Message', name: 'Anton', text: 'Hello world!', date: '24.10.2022' });
 })
